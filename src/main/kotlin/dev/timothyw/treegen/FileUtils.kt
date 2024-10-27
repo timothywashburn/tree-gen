@@ -2,7 +2,6 @@ package dev.timothyw.treegen
 
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.fileSize
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.walk
 

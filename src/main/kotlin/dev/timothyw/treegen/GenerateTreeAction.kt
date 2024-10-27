@@ -3,15 +3,14 @@ package dev.timothyw.treegen
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.ide.CopyPasteManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VirtualFile
 import java.awt.datatransfer.StringSelection
 import java.nio.file.Path
 import kotlin.io.path.isDirectory
@@ -50,10 +49,8 @@ class GenerateTreeAction : AnAction() {
 
             val tree = TreeGenerator().generateTree(path, config)
 
-            // Copy to clipboard
             CopyPasteManager.getInstance().setContents(StringSelection(tree))
 
-            // Generate file if requested
             if (config.generateFile) {
                 generateTreeFile(project, tree)
             }
@@ -70,7 +67,6 @@ class GenerateTreeAction : AnAction() {
     }
 
     private fun generateTreeFile(project: Project, treeContent: String) {
-        // Get project base path
         val projectPath = project.basePath ?: return
         val projectRoot = LocalFileSystem.getInstance().findFileByPath(projectPath) ?: return
 

@@ -1,9 +1,11 @@
 package dev.timothyw.treegen
 
+import com.intellij.openapi.diagnostic.Logger
 import dev.timothyw.treegen.FileUtils.formattedFileSize
 import java.nio.file.Path
-import kotlin.io.path.*
-import com.intellij.openapi.diagnostic.Logger
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 
 class TreeGenerator {
     private val log = Logger.getInstance(TreeGenerator::class.java)
@@ -23,7 +25,7 @@ class TreeGenerator {
     }
 
     fun generateTree(path: Path, config: TreeConfig): String {
-        log.info("Custom ignore patterns: ${config.customIgnorePatterns}")
+        log.warn("TreeGen Plugin - Starting tree generation with patterns: ${config.customIgnorePatterns}")
         return generateTreeImpl(path, "", config)
     }
 
@@ -52,34 +54,39 @@ class TreeGenerator {
     }
 
     private fun getFilteredEntries(path: Path, config: TreeConfig): List<Path> {
-        val ignorePatterns = DEFAULT_IGNORE_PATTERNS + config.customIgnorePatterns.flatMap { pattern ->
-            // Split by comma in case user entered multiple patterns
-            pattern.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        val defaultPatterns = DEFAULT_IGNORE_PATTERNS.map { pattern ->
+            try {
+                pattern.toRegex(RegexOption.IGNORE_CASE)
+            } catch (e: Exception) {
+                Regex.escape(pattern).toRegex(RegexOption.IGNORE_CASE)
+            }
         }
 
-        log.info("Processing directory: ${path.name}")
-        log.info("All ignore patterns: $ignorePatterns")
+        val customPatterns = config.customIgnorePatterns.map { pattern ->
+            try {
+                pattern.toRegex(RegexOption.IGNORE_CASE)
+            } catch (e: Exception) {
+                log.warn("TreeGen Plugin - Invalid regex pattern: $pattern, using as literal")
+                Regex.escape(pattern).toRegex(RegexOption.IGNORE_CASE)
+            }
+        }
+
+        val allPatterns = defaultPatterns + customPatterns
 
         return path.listDirectoryEntries().filter { entry ->
             val name = entry.name
-            log.info("Checking file: $name")
+            log.warn("TreeGen Plugin - Checking file: $name")
 
-            val shouldExcludeByPattern = ignorePatterns.any { pattern ->
-                try {
-                    val regex = pattern.toRegex(RegexOption.IGNORE_CASE)
-                    val matches = regex.containsMatchIn(name)
-                    log.info("Pattern '$pattern' matches '$name': $matches")
-                    matches
-                } catch (e: Exception) {
-                    log.info("Pattern '$pattern' is not valid regex, using contains")
-                    name.contains(pattern, ignoreCase = true)
-                }
+            val shouldExclude = allPatterns.any { regex ->
+                val matches = regex.containsMatchIn(name)
+                log.warn("TreeGen Plugin - Testing if pattern '${regex.pattern}' matches '$name': $matches")
+                matches
             }
 
-            val shouldInclude = !shouldExcludeByPattern && (config.showHidden || !name.startsWith("."))
-            log.info("Final decision for $name: ${if (shouldInclude) "include" else "exclude"}")
+            val shouldInclude = !shouldExclude && (config.showHidden || !name.startsWith("."))
+            log.warn("TreeGen Plugin - Final decision for $name: ${if (shouldInclude) "include" else "exclude"}")
 
-            !shouldExcludeByPattern && (config.showHidden || !name.startsWith("."))
+            shouldInclude
         }.sortedBy { it.name }
     }
 
