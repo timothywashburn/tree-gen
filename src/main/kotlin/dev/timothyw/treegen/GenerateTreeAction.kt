@@ -8,12 +8,18 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.ide.CopyPasteManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
+import java.awt.datatransfer.StringSelection
 import java.nio.file.Path
 import kotlin.io.path.isDirectory
 
 class GenerateTreeAction : AnAction() {
     override fun update(e: AnActionEvent) {
-        if (!ApplicationManager.getApplication().isInitialized) {
+        val app = ApplicationManager.getApplication()
+        if (app.isDisposed) {
             e.presentation.isEnabled = false
             return
         }
@@ -23,7 +29,8 @@ class GenerateTreeAction : AnAction() {
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        if (!ApplicationManager.getApplication().isInitialized) {
+        val app = ApplicationManager.getApplication()
+        if (app.isDisposed) {
             return
         }
 
@@ -36,30 +43,53 @@ class GenerateTreeAction : AnAction() {
             return
         }
 
-        ApplicationManager.getApplication().invokeLater({
+        app.invokeLater({
             val config = TreeConfigDialog(project).let { dialog ->
                 if (dialog.showAndGet()) dialog.getConfig() else return@invokeLater
             }
 
             val tree = TreeGenerator().generateTree(path, config)
 
-            ApplicationManager.getApplication().runWriteAction {
-                try {
-                    val treeFile = virtualFile.findChild("directory-tree.txt")
-                        ?: virtualFile.createChildData(this, "directory-tree.txt")
+            // Copy to clipboard
+            CopyPasteManager.getInstance().setContents(StringSelection(tree))
 
-                    val document = FileDocumentManager.getInstance().getDocument(treeFile)
-                    document?.setText(tree)
+            // Generate file if requested
+            if (config.generateFile) {
+                generateTreeFile(project, tree)
+            }
 
-                    Messages.showInfoMessage(project, "Directory tree generated successfully!", "Success")
-                } catch (e: Exception) {
+            app.invokeLater({
+                val message = if (config.generateFile) {
+                    "Directory tree generated and copied to clipboard! File created in project root."
+                } else {
+                    "Directory tree copied to clipboard!"
+                }
+                Messages.showInfoMessage(project, message, "Success")
+            }, ModalityState.NON_MODAL)
+        }, ModalityState.NON_MODAL)
+    }
+
+    private fun generateTreeFile(project: Project, treeContent: String) {
+        // Get project base path
+        val projectPath = project.basePath ?: return
+        val projectRoot = LocalFileSystem.getInstance().findFileByPath(projectPath) ?: return
+
+        WriteCommandAction.runWriteCommandAction(project) {
+            try {
+                val treeFile = projectRoot.findChild("directory-tree.txt")
+                    ?: projectRoot.createChildData(this, "directory-tree.txt")
+
+                val document = FileDocumentManager.getInstance().getDocument(treeFile)
+                document?.setText(treeContent)
+            } catch (e: Exception) {
+                ApplicationManager.getApplication().invokeLater({
                     Messages.showErrorDialog(
                         project,
-                        "Failed to generate directory tree: ${e.message}",
+                        "Failed to generate tree file: ${e.message}",
                         "Error"
                     )
-                }
+                }, ModalityState.NON_MODAL)
             }
-        }, ModalityState.NON_MODAL)
+        }
     }
 }

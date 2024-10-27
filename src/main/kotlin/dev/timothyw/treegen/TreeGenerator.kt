@@ -3,8 +3,11 @@ package dev.timothyw.treegen
 import dev.timothyw.treegen.FileUtils.formattedFileSize
 import java.nio.file.Path
 import kotlin.io.path.*
+import com.intellij.openapi.diagnostic.Logger
 
 class TreeGenerator {
+    private val log = Logger.getInstance(TreeGenerator::class.java)
+
     companion object {
         private val DEFAULT_IGNORE_PATTERNS = setOf(
             ".git",
@@ -20,6 +23,7 @@ class TreeGenerator {
     }
 
     fun generateTree(path: Path, config: TreeConfig): String {
+        log.info("Custom ignore patterns: ${config.customIgnorePatterns}")
         return generateTreeImpl(path, "", config)
     }
 
@@ -48,13 +52,35 @@ class TreeGenerator {
     }
 
     private fun getFilteredEntries(path: Path, config: TreeConfig): List<Path> {
-        val ignorePatterns = DEFAULT_IGNORE_PATTERNS + config.customIgnorePatterns
-        return path.listDirectoryEntries()
-            .filter { entry ->
-                val shouldInclude = ignorePatterns.none { pattern -> entry.name.contains(pattern) }
-                shouldInclude && (config.showHidden || !entry.name.startsWith("."))
+        val ignorePatterns = DEFAULT_IGNORE_PATTERNS + config.customIgnorePatterns.flatMap { pattern ->
+            // Split by comma in case user entered multiple patterns
+            pattern.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        }
+
+        log.info("Processing directory: ${path.name}")
+        log.info("All ignore patterns: $ignorePatterns")
+
+        return path.listDirectoryEntries().filter { entry ->
+            val name = entry.name
+            log.info("Checking file: $name")
+
+            val shouldExcludeByPattern = ignorePatterns.any { pattern ->
+                try {
+                    val regex = pattern.toRegex(RegexOption.IGNORE_CASE)
+                    val matches = regex.containsMatchIn(name)
+                    log.info("Pattern '$pattern' matches '$name': $matches")
+                    matches
+                } catch (e: Exception) {
+                    log.info("Pattern '$pattern' is not valid regex, using contains")
+                    name.contains(pattern, ignoreCase = true)
+                }
             }
-            .sortedBy { it.name }
+
+            val shouldInclude = !shouldExcludeByPattern && (config.showHidden || !name.startsWith("."))
+            log.info("Final decision for $name: ${if (shouldInclude) "include" else "exclude"}")
+
+            !shouldExcludeByPattern && (config.showHidden || !name.startsWith("."))
+        }.sortedBy { it.name }
     }
 
     private fun appendDirectories(

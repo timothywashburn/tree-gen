@@ -10,6 +10,7 @@ import javax.swing.JComponent
 class TreeConfigDialog(project: Project) : DialogWrapper(project) {
     private val showHiddenCheckBox = JBCheckBox("Show hidden files", false)
     private val includeSizesCheckBox = JBCheckBox("Show file sizes", false)
+    private val generateFileCheckBox = JBCheckBox("Generate file in project root", false)
     private val maxDepthField = JBTextField("999")
     private val ignorePatternField = JBTextField()
 
@@ -21,6 +22,7 @@ class TreeConfigDialog(project: Project) : DialogWrapper(project) {
     override fun createCenterPanel(): JComponent = panel {
         row { showHiddenCheckBox() }
         row { includeSizesCheckBox() }
+        row { generateFileCheckBox() }
         row("Max Depth:") { maxDepthField() }
         row("Additional Ignore Patterns (comma-separated):") { ignorePatternField() }
     }
@@ -28,6 +30,7 @@ class TreeConfigDialog(project: Project) : DialogWrapper(project) {
     fun getConfig(): TreeConfig = TreeConfig(
         showHidden = showHiddenCheckBox.isSelected,
         includeSizes = includeSizesCheckBox.isSelected,
+        generateFile = generateFileCheckBox.isSelected,
         maxDepth = maxDepthField.text.toIntOrNull() ?: -1,
         customIgnorePatterns = ignorePatternField.text
             .split(",")

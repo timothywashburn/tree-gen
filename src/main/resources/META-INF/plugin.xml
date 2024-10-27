@@ -7,7 +7,7 @@
 
     <actions>
         <action id="GenerateDirectoryTree"
-                class="dev.kyro.treegen.GenerateTreeAction"
+                class="dev.timothyw.treegen.GenerateTreeAction"
                 text="Generate Directory Tree"
                 description="Generate ASCII directory tree structure">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
