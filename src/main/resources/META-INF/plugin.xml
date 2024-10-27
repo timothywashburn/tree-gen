@@ -2,7 +2,8 @@
 <idea-plugin>
     <id>dev.timothyw.treegen</id>
     <name>Tree Gen</name>
-    <vendor>Timothy</vendor>
+    <vendor>Timothy Washburn</vendor>
+
     <depends>com.intellij.modules.platform</depends>
 
     <actions>
@@ -14,4 +15,7 @@
             <add-to-group group-id="MainToolBar" anchor="last"/>
         </action>
     </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
 </idea-plugin>

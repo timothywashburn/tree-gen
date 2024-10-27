@@ -4,8 +4,8 @@ plugins {
     id("org.jetbrains.intellij") version "1.17.2"
 }
 
-group = "com.example"
-version = "1.0-SNAPSHOT"
+group = "dev.timothyw"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -14,6 +14,7 @@ repositories {
 intellij {
     version.set("2023.3")
     type.set("IC")
+    updateSinceUntilBuild.set(false)
 }
 
 tasks {
@@ -24,8 +25,16 @@ tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
     }
+
+    buildSearchableOptions {
+        enabled = false
+    }
+
     patchPluginXml {
         sinceBuild.set("233")
-        untilBuild.set("241.*")
+        untilBuild.set("242.*")
+        version.set(project.version.toString())
+        pluginDescription.set(file("src/main/resources/description.html").readText())
+        changeNotes.set(file("src/main/resources/change-notes.html").readText())
     }
 }
