@@ -29,9 +29,7 @@ class GenerateTreeAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val app = ApplicationManager.getApplication()
-        if (app.isDisposed) {
-            return
-        }
+        if (app.isDisposed) return
 
         val project = e.project ?: return
         val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return

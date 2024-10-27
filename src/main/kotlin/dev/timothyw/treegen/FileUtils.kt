@@ -19,13 +19,11 @@ object FileUtils {
         return "%.1f %s".format(value, units[unitIndex])
     }
 
-    @OptIn(ExperimentalPathApi::class, ExperimentalPathApi::class)
+    @OptIn(ExperimentalPathApi::class)
     fun calculateDirSize(dir: Path): String {
         var totalSize = 0L
         dir.walk().forEach { path ->
-            if (path.isRegularFile()) {
-                totalSize += path.toFile().length()
-            }
+            if (path.isRegularFile()) totalSize += path.toFile().length()
         }
         return formatSize(totalSize)
     }

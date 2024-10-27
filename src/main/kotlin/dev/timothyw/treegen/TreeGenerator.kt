@@ -13,19 +13,21 @@ class TreeGenerator {
     companion object {
         private val DEFAULT_IGNORE_PATTERNS = setOf(
             ".git",
+            ".idea",
+            ".gradle",
+            ".venv",
             "node_modules",
             "__pycache__",
-            ".idea",
+            "venv",
             "build",
-            "dist",
-            ".gradle",
             "target",
+            "dist",
             "out"
         )
     }
 
     fun generateTree(path: Path, config: TreeConfig): String {
-        log.warn("TreeGen Plugin - Starting tree generation with patterns: ${config.customIgnorePatterns}")
+        log.info("TreeGen Plugin - Starting tree generation with patterns: ${config.customIgnorePatterns}")
         return generateTreeImpl(path, "", config)
     }
 
@@ -35,17 +37,11 @@ class TreeGenerator {
         config: TreeConfig,
         currentDepth: Int = 0
     ): String {
-        if (currentDepth == config.maxDepth) {
-            return ""
-        }
-
         val builder = StringBuilder()
         val entries = getFilteredEntries(path, config)
         val (dirs, files) = entries.partition { it.isDirectory() }
 
-        if (prefix.isEmpty()) {
-            builder.append("${path.name}/\n")
-        }
+        if (prefix.isEmpty()) builder.append("${path.name}/\n")
 
         appendDirectories(builder, dirs, files, prefix, config, currentDepth)
         appendFiles(builder, files, prefix, config)
@@ -75,16 +71,13 @@ class TreeGenerator {
 
         return path.listDirectoryEntries().filter { entry ->
             val name = entry.name
-            log.warn("TreeGen Plugin - Checking file: $name")
 
             val shouldExclude = allPatterns.any { regex ->
                 val matches = regex.containsMatchIn(name)
-                log.warn("TreeGen Plugin - Testing if pattern '${regex.pattern}' matches '$name': $matches")
                 matches
             }
 
             val shouldInclude = !shouldExclude && (config.showHidden || !name.startsWith("."))
-            log.warn("TreeGen Plugin - Final decision for $name: ${if (shouldInclude) "include" else "exclude"}")
 
             shouldInclude
         }.sortedBy { it.name }
