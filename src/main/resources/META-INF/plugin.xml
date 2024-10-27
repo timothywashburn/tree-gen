@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<idea-plugin>
+    <id>dev.timothyw.treegen</id>
+    <name>Tree Gen</name>
+    <vendor>Timothy</vendor>
+    <depends>com.intellij.modules.platform</depends>
+
+    <actions>
+        <action id="GenerateDirectoryTree"
+                class="dev.kyro.treegen.GenerateTreeAction"
+                text="Generate Directory Tree"
+                description="Generate ASCII directory tree structure">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="MainToolBar" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
