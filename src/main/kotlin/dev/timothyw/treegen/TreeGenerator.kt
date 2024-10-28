@@ -50,12 +50,8 @@ class TreeGenerator {
     }
 
     private fun getFilteredEntries(path: Path, config: TreeConfig): List<Path> {
-        val defaultPatterns = DEFAULT_IGNORE_PATTERNS.map { pattern ->
-            try {
-                pattern.toRegex(RegexOption.IGNORE_CASE)
-            } catch (e: Exception) {
-                Regex.escape(pattern).toRegex(RegexOption.IGNORE_CASE)
-            }
+        val defaultExcludes = { entry: Path ->
+            entry.isDirectory() && DEFAULT_IGNORE_PATTERNS.contains(entry.name)
         }
 
         val customPatterns = config.customIgnorePatterns.map { pattern ->
@@ -67,17 +63,17 @@ class TreeGenerator {
             }
         }
 
-        val allPatterns = defaultPatterns + customPatterns
-
         return path.listDirectoryEntries().filter { entry ->
             val name = entry.name
 
-            val shouldExclude = allPatterns.any { regex ->
-                val matches = regex.containsMatchIn(name)
-                matches
+            val shouldExcludeByDefault = defaultExcludes(entry)
+            val shouldExcludeByCustom = customPatterns.any { regex ->
+                regex.containsMatchIn(name)
             }
 
-            val shouldInclude = !shouldExclude && (config.showHidden || !name.startsWith("."))
+            val shouldInclude = !shouldExcludeByDefault &&
+                    !shouldExcludeByCustom &&
+                    (config.showHidden || !name.startsWith("."))
 
             shouldInclude
         }.sortedBy { it.name }
