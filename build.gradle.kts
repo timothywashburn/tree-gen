@@ -12,8 +12,8 @@ repositories {
 }
 
 intellij {
-    version.set("2023.3")
-    type.set("IC")
+    version.set("2024.1")
+    type.set("IU")
     updateSinceUntilBuild.set(false)
 }
 
@@ -31,10 +31,14 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("233")
+        sinceBuild.set("232")
         untilBuild.set("242.*")
         version.set(project.version.toString())
         pluginDescription.set(file("src/main/resources/description.html").readText())
         changeNotes.set(file("src/main/resources/change-notes.html").readText())
+    }
+
+    publishPlugin {
+        token.set(project.findProperty("jetBrainsMarketplaceToken") as? String ?: "")
     }
 }
