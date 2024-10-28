@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.timothyw"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -35,7 +35,7 @@ tasks {
         untilBuild.set("242.*")
         version.set(project.version.toString())
         pluginDescription.set(file("src/main/resources/description.html").readText())
-        changeNotes.set(file("src/main/resources/change-notes.html").readText())
+        changeNotes.set(file("src/main/resources/changelog.html").readText())
     }
 
     publishPlugin {

@@ -63,8 +63,8 @@ class GenerateTreeAction : AnAction() {
                     "Directory tree copied to clipboard!"
                 }
                 Messages.showInfoMessage(project, message, "Success")
-            }, ModalityState.NON_MODAL)
-        }, ModalityState.NON_MODAL)
+            }, ModalityState.current())
+        }, ModalityState.current())
     }
 
     private fun generateTreeFile(project: Project, treeContent: String) {
@@ -85,7 +85,7 @@ class GenerateTreeAction : AnAction() {
                         "Failed to generate tree file: ${e.message}",
                         "Error"
                     )
-                }, ModalityState.NON_MODAL)
+                }, ModalityState.current())
             }
         }
     }
