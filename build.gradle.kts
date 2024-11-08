@@ -5,14 +5,14 @@ plugins {
 }
 
 group = "dev.timothyw"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
 }
 
 intellij {
-    version.set("2024.1")
+    version.set("243-EAP-SNAPSHOT")
     type.set("IU")
     updateSinceUntilBuild.set(false)
 }
@@ -32,7 +32,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("232")
-        untilBuild.set("242.*")
+//        untilBuild.set("242.*")
         version.set(project.version.toString())
         pluginDescription.set(file("src/main/resources/description.html").readText())
         changeNotes.set(file("src/main/resources/changelog.html").readText())
