@@ -1,4 +1,7 @@
 .idea/
+.intellijPlatform/
 .gradle/
+.kotlin/
 build/
 gradle.properties
+.DS_Store
