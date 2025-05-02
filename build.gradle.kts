@@ -19,7 +19,7 @@ dependencies {
         intellijIdeaUltimate("2025.1")
     }
 
-    implementation("org.jetbrains:marketplace-zip-signer:0.1.8")
+    implementation("org.jetbrains:marketplace-zip-signer:0.1.34")
 }
 
 intellijPlatform {
