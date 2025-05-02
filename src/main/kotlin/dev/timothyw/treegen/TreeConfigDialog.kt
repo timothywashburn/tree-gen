@@ -10,6 +10,7 @@ import javax.swing.JComponent
 
 class TreeConfigDialog(project: Project) : DialogWrapper(project) {
     private val showHiddenCheckBox = JBCheckBox("Show hidden files", false)
+    private val ignoreExcludedCheckBox = JBCheckBox("Ignore files", true)
     private val includeSizesCheckBox = JBCheckBox("Show file and folder sizes", false)
     private val generateFileCheckBox = JBCheckBox("Generate file in project root", false)
     private val ignorePatternField = JBTextField()
@@ -23,6 +24,9 @@ class TreeConfigDialog(project: Project) : DialogWrapper(project) {
         group {
             row {
                 cell(showHiddenCheckBox)
+            }
+            row {
+                cell(ignoreExcludedCheckBox)
             }
             row {
                 cell(includeSizesCheckBox)
@@ -41,6 +45,7 @@ class TreeConfigDialog(project: Project) : DialogWrapper(project) {
 
     fun getConfig(): TreeConfig = TreeConfig(
         showHidden = showHiddenCheckBox.isSelected,
+        ignoreExcluded = ignoreExcludedCheckBox.isSelected,
         includeSizes = includeSizesCheckBox.isSelected,
         customIgnorePatterns = ignorePatternField.text
             .split(",")

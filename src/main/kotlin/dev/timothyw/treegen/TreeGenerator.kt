@@ -63,7 +63,7 @@ class TreeGenerator {
 
                 val isIgnored = customPatterns.any { it.containsMatchIn(name) }
                 val isHidden = name.startsWith(".") && !config.showHidden
-                val isIntelliJExcluded = entry.isDirectory() &&
+                val isIntelliJExcluded = entry.isDirectory() && config.ignoreExcluded &&
                         intellijExcludedDirs.any { excludedPath -> absolutePath.startsWith(excludedPath) }
 
                 isIgnored || isHidden || isIntelliJExcluded
