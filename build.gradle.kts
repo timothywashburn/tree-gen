@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.timothyw"
-version = "1.0.5"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
@@ -20,6 +20,7 @@ dependencies {
     }
 
     implementation("org.jetbrains:marketplace-zip-signer:0.1.34")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.2.0.202503040940-r")
 }
 
 intellijPlatform {
