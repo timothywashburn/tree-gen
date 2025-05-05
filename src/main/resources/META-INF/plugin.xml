@@ -9,7 +9,9 @@
         <action id="GenerateDirectoryTree"
                 class="dev.timothyw.treegen.GenerateTreeAction"
                 text="Generate Directory Tree"
-                description="Generate ASCII directory tree structure">
+                description="Generate ASCII directory tree structure"
+                icon="icons/generate.svg"
+        >
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
             <add-to-group group-id="MainToolBar" anchor="last"/>
         </action>
