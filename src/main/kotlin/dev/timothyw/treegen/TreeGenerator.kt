@@ -10,12 +10,12 @@ import kotlin.io.path.name
 class TreeGenerator {
     private val log = logger<TreeGenerator>()
 
-    fun generateTree(path: Path, config: TreeConfig): String {
+    fun generateTree(path: Path, projectBasePath: Path, config: TreeConfig): String {
         println("treegen plugin - starting tree generation with patterns: ${config.customIgnorePatterns}")
 
         val gitIgnoreHandler = GitIgnoreHandler()
         val usingGitIgnore = if (config.useGitIgnore) {
-            val foundGitIgnore = gitIgnoreHandler.loadGitIgnoreFiles(path)
+            val foundGitIgnore = gitIgnoreHandler.loadGitIgnoreFromDirectory(projectBasePath)
             if (foundGitIgnore) {
                 println("using gitignore patterns from .gitignore files")
             } else {
@@ -38,6 +38,8 @@ class TreeGenerator {
         usingGitIgnore: Boolean,
         currentDepth: Int = 0
     ): String {
+        if (usingGitIgnore) gitIgnoreHandler.loadGitIgnoreFromDirectory(path)
+
         val builder = StringBuilder()
         val entries = getFilteredEntries(path, config, gitIgnoreHandler, usingGitIgnore)
         val (dirs, files) = entries.partition { it.isDirectory() }

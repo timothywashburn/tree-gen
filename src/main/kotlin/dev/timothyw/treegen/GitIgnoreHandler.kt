@@ -6,44 +6,37 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.file.Path
 
-/**
- * Handles gitignore pattern matching using the JGit library
- */
 class GitIgnoreHandler {
     private val log = logger<GitIgnoreHandler>()
     private val ignoreNodes = mutableMapOf<Path, IgnoreNode>()
 
     /**
-     * Loads gitignore files from the given path and its parent directories
+     * Loads a .gitignore file from a specific directory if it exists and hasn't been loaded yet
      *
-     * @param rootPath The path to start searching from
-     * @return true if any gitignore files were found and loaded
+     * @param directoryPath The directory to load .gitignore from
+     * @return true if a .gitignore file was loaded
      */
-    fun loadGitIgnoreFiles(rootPath: Path): Boolean {
-        var currentDir = rootPath.toFile()
-        var foundFiles = false
+    fun loadGitIgnoreFromDirectory(path: Path): Boolean {
+        if (ignoreNodes.containsKey(path)) return false
 
-        while (currentDir != null) {
-            val gitIgnoreFile = File(currentDir, ".gitignore")
-            if (gitIgnoreFile.exists() && gitIgnoreFile.isFile) {
-                try {
-                    FileInputStream(gitIgnoreFile).use { inputStream ->
-                        val ignoreNode = IgnoreNode()
-                        ignoreNode.parse(inputStream)
-                        if (ignoreNode.rules.isNotEmpty()) {
-                            ignoreNodes[currentDir.toPath()] = ignoreNode
-                            foundFiles = true
-                            println("loaded gitignore from ${gitIgnoreFile.absolutePath}")
-                        }
+        val gitIgnoreFile = File(path.toFile(), ".gitignore")
+        if (gitIgnoreFile.exists() && gitIgnoreFile.isFile) {
+            try {
+                FileInputStream(gitIgnoreFile).use { inputStream ->
+                    val ignoreNode = IgnoreNode()
+                    ignoreNode.parse(inputStream)
+                    if (ignoreNode.rules.isNotEmpty()) {
+                        ignoreNodes[path] = ignoreNode
+                        println("loaded gitignore from ${gitIgnoreFile.absolutePath}")
+                        return true
                     }
-                } catch (e: Exception) {
-                    log.warn("Failed to parse .gitignore file at ${gitIgnoreFile.absolutePath}", e)
                 }
+            } catch (e: Exception) {
+                log.warn("Failed to parse .gitignore file at ${gitIgnoreFile.absolutePath}", e)
             }
-            currentDir = currentDir.parentFile
         }
 
-        return foundFiles
+        return false
     }
 
     /**

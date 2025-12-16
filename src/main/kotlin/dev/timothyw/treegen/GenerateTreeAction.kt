@@ -35,6 +35,7 @@ class GenerateTreeAction : AnAction() {
         if (app.isDisposed) return
 
         val project = e.project ?: return
+        val projectBasePath = Path.of(project.basePath ?: return)
         val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
 
         val path = Path.of(virtualFile.path)
@@ -48,7 +49,7 @@ class GenerateTreeAction : AnAction() {
                 if (dialog.showAndGet()) dialog.getConfig() else return@invokeLater
             }
 
-            val tree = TreeGenerator().generateTree(path, config)
+            val tree = TreeGenerator().generateTree(path, projectBasePath, config)
 
             CopyPasteManager.getInstance().setContents(StringSelection(tree))
 
