@@ -95,7 +95,7 @@ class TreeGenerator {
             val newPrefix = prefix + if (isLast) "    " else "│   "
             val sizeInfo = if (config.includeSizes) " (${FileUtils.calculateDirSize(dir)})" else ""
 
-            builder.append("$prefix├── ${dir.name}/$sizeInfo\n")
+            builder.append("$prefix${if (isLast) "└── " else "├── "} ${dir.name}/$sizeInfo\n")
             builder.append(buildTreeRecursively(dir, newPrefix, config, gitIgnoreHandler, usingGitIgnore, currentDepth + 1))
         }
     }
